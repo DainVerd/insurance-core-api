@@ -52,7 +52,7 @@ public class ClaimService : IClaimService
         return newClaim.Id;
     }
 
-    public ClaimDto? GetById(Guid id)
+    public ClaimDto GetById(Guid id)
     {
         if (id == Guid.Empty)
             throw new ValidationException("Provided Claim id is default value!");

@@ -29,12 +29,12 @@ public class ClaimController : Controller
     }
 
     [HttpGet("{id:guid}")]
-    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ClaimDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult GetClaim([FromRoute] Guid id)
     {
         if (id == Guid.Empty)
-            throw new ValidationException("Provided Customer id is default value!");
+            throw new ValidationException("Provided claim id has default value or null!");
 
         var result = _claimService.GetById(id);
 
