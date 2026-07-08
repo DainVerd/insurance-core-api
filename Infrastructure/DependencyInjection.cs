@@ -1,5 +1,7 @@
 ﻿using Application.Interfaces.Repositories;
+using Application.Interfaces.Services;
 using Infrastructure.Repositories;
+using Infrastructure.Services;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure;
@@ -13,7 +15,7 @@ public static class DependencyInjection
         services.AddSingleton<ICustomerRepository, CustomerRepository>();
         services.AddSingleton<IPolicyRepository, PolicyRepository>();
 
-
+        services.AddTransient<ICustomerService, CustomerService>();
         return services;
     }
 }
