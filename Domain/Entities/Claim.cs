@@ -10,5 +10,5 @@ public class Claim : IEntity
     public DateTimeOffset IncidentDate { get; set; }
     public decimal AmountRequested { get; set; }
     public ClaimStatus Status { get; set; }
-    public string? DecisionReason = null;
+    public string? DecisionReason { get; set; }
 }

@@ -40,4 +40,16 @@ public class ClaimController : Controller
 
         return Ok(result);
     }
+
+    [HttpPost("{id:guid}/decide")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public IActionResult CreateClaim([FromRoute] Guid id, [FromBody] DecideClaimRequest request)
+    {
+        _claimService.Decide(id, request);
+
+        return Ok();
+    }
 }

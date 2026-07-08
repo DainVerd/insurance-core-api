@@ -4,7 +4,6 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
-using Infrastructure.Repositories;
 using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services;
@@ -33,7 +32,7 @@ public class ClaimService : IClaimService
             throw new ConflictException("Claims can only be created for Active policies.");
 
         var incidentDateOnly = DateOnly.FromDateTime(claimToAdd.IncidentDate.DateTime);
-        if (incidentDateOnly <= policy.StartDate || incidentDateOnly >= policy.EndDate)
+        if (incidentDateOnly < policy.StartDate || incidentDateOnly > policy.EndDate)
             throw new ConflictException("IncidentDate must be within the policy period.");
 
         var newClaim = new Claim
@@ -54,7 +53,7 @@ public class ClaimService : IClaimService
     public ClaimDto GetById(Guid id)
     {
         if (id == Guid.Empty)
-            throw new ValidationException("Provided Claim id is default value!");
+            throw new ValidationException("Provided Claim id has default value!");
 
         var claim = _claimRepository.GetById(id)
         ?? throw new NotFoundException($"Claim with ID {id} was not found.");
@@ -68,5 +67,36 @@ public class ClaimService : IClaimService
             Status = claim.Status,
             DecisionReason = claim.DecisionReason
         };
+    }
+
+
+    public void Decide(Guid claimId, DecideClaimRequest request)
+    {
+        if (claimId == Guid.Empty)
+            throw new ValidationException("Provided Claim id has default value!");
+
+        if (request is null)
+            throw new ArgumentNullException("provided request argument is null!");
+
+        var allowedStatuses = new List<ClaimStatus> { ClaimStatus.Approved, ClaimStatus.Rejected };
+
+        if (!allowedStatuses.Contains(request.Status))
+            throw new ConflictException($"Provided status: {request.Status} can not be used.");
+
+        var statusesWithDecisionReason = new List<ClaimStatus> { ClaimStatus.Rejected };
+
+        if (!statusesWithDecisionReason.Contains(request.Status) && !string.IsNullOrEmpty(request.DecisionReason))
+            throw new ConflictException($"Decision with {request.Status} status mustn't have DecisionReason field!");
+
+        var claimToDecide = _claimRepository.GetById(claimId)
+        ?? throw new NotFoundException($"Claim with ID {claimId} was not found.");
+
+        if (claimToDecide.Status != ClaimStatus.New)
+            throw new ConflictException("Claim to decide does not have status New.");
+
+        claimToDecide.Status = request.Status;
+        claimToDecide.DecisionReason = request.DecisionReason;
+
+        _claimRepository.Update(claimToDecide);
     }
 }
