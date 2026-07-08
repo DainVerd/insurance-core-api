@@ -18,6 +18,7 @@ public class PolicyService : IPolicyService
         _policyRepository = policyRepository;
 
     }
+
     public Guid CreatePolicy(CreatePolicyRequest request)
     {
         if (request is null)
@@ -65,6 +66,32 @@ public class PolicyService : IPolicyService
             Premium = policy.Premium,
             StartDate = policy.StartDate,
             Status = policy.Status,
+            ProductType = policy.ProductType
         };
+    }
+
+    public void ActivatePolicy(Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided Customer id has default value!");
+
+        var policyToActivate = _policyRepository.GetById(id)
+        ?? throw new NotFoundException($"Policy with ID {id} was not found.");
+
+        if (policyToActivate.Status != PolicyStatus.Draft)
+            throw new ConflictException("Only Draft policies can be activated.");
+
+        var customerActivePolicies = _policyRepository
+           .GetActivePoliciesByCustomerAndProductType(policyToActivate.CustomerId, policyToActivate.ProductType);
+
+        var hasOverlap = customerActivePolicies
+         .Any(existing => existing.Id != policyToActivate.Id && (policyToActivate.StartDate <= existing.EndDate && existing.StartDate <= policyToActivate.EndDate));
+
+        if (hasOverlap)
+            throw new ConflictException($"Customer already has an active {policyToActivate.ProductType} policy with overlapping dates.");
+
+        policyToActivate.Status = PolicyStatus.Active;
+
+        _policyRepository.Update(policyToActivate);
     }
 }
