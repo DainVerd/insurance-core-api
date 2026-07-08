@@ -51,4 +51,12 @@ public class PolicyService : IPolicyService
 
         return policy.Id;
     }
+
+    public Policy? GePolicyById(Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided Policy id is default value!");
+
+        return _policyRepository.GetById(id);
+    }
 }
