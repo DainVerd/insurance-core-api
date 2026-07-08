@@ -36,20 +36,8 @@ public class PolicyController : Controller
         if (id == Guid.Empty)
             throw new ValidationException("Provided Policy id is default value!");
 
-        var result = _policyService.GePolicyById(id);
+        var result = _policyService.GetById(id);
 
-        if (result is null)
-            throw new NotFoundException("Policy was not found in db!");
-
-        return Ok(new PolicyDto
-        {
-            Id = result.Id,
-            CustomerId = result.CustomerId,
-            ProductType = result.ProductType,
-            StartDate = result.StartDate,
-            EndDate = result.EndDate,
-            Premium = result.Premium,
-            Status = result.Status,
-        });
+        return Ok(result);
     }
 }

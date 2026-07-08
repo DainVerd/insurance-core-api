@@ -17,6 +17,7 @@ public static class DependencyInjection
 
         services.AddTransient<ICustomerService, CustomerService>();
         services.AddTransient<IPolicyService, PolicyService>();
+        services.AddTransient<IClaimService, ClaimService>();
 
         return services;
     }

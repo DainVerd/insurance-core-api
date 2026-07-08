@@ -6,5 +6,5 @@ namespace Application.Interfaces.Services;
 public interface IPolicyService
 {
     Guid CreatePolicy(CreatePolicyRequest request);
-    Policy? GePolicyById(Guid id);
+    PolicyDto GetById(Guid id);
 }
