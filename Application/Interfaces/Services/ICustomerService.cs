@@ -7,5 +7,5 @@ public interface ICustomerService
 {
     Guid CreateCustomer(CreateCustomerRequest request);
 
-    Customer? GetCustomerById(Guid id);
+    CustomerDto GetCustomerById(Guid id);
 }

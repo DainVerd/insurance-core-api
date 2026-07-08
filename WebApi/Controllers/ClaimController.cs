@@ -1,9 +1,8 @@
 ﻿using Application.DTOs;
 using Application.Interfaces.Services;
 using Asp.Versioning;
-using Domain.Constants;
-using Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Controllers;
 
@@ -25,6 +24,19 @@ public class ClaimController : Controller
     public IActionResult CreateClaim([FromBody] CreateClaimRequest request)
     {
         var result = _claimService.CreateClaim(request);
+
+        return Ok(result);
+    }
+
+    [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public ActionResult GetClaim([FromRoute] Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided Customer id is default value!");
+
+        var result = _claimService.GetById(id);
 
         return Ok(result);
     }
