@@ -24,7 +24,7 @@ public class PolicyService : IPolicyService
             throw new ArgumentNullException(nameof(request));
 
         if (request.CustomerId == Guid.Empty)
-            throw new ValidationException("Provided Customer id is default value!");
+            throw new ValidationException("Provided Customer id has default value!");
 
         if (request.Premium < 0)
             throw new ValidationException("Provided Premium is less than zero!");
