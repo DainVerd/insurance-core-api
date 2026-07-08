@@ -17,7 +17,7 @@ public class CustomerService : ICustomerService
     public Guid CreateCustomer(CreateCustomerRequest request)
     {
         if (request is null)
-            throw new ArgumentNullException("provided argument is null");
+            throw new ArgumentNullException("Id can not be default value or null");
 
         if (string.IsNullOrEmpty(request.FullName))
             throw new ValidationException("Full name is required.");
@@ -28,11 +28,14 @@ public class CustomerService : ICustomerService
         return customer.Id;
     }
 
-    public Customer? GetCustomerById(Guid id)
+    public CustomerDto GetCustomerById(Guid id)
     {
         if (id == Guid.Empty)
             throw new ValidationException("Id can not be default value or null");
 
-        return _customerRepository.GetById(id);
+        var customer = _customerRepository.GetById(id)
+       ?? throw new NotFoundException($"Customer with ID {id} was not found.");
+
+        return new CustomerDto { Id = customer.Id, FullName = customer.FullName };
     }
 }
