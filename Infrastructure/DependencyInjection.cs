@@ -16,6 +16,8 @@ public static class DependencyInjection
         services.AddSingleton<IPolicyRepository, PolicyRepository>();
 
         services.AddTransient<ICustomerService, CustomerService>();
+        services.AddTransient<IPolicyService, PolicyService>();
+
         return services;
     }
 }
