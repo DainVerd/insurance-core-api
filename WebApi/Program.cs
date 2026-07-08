@@ -64,5 +64,6 @@ try
 }
 catch (Exception ex)
 {
+    // TODO: add logging
     Console.WriteLine(ex);
 }
