@@ -1,4 +1,5 @@
 ﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Entities;
@@ -22,5 +23,17 @@ public class CustomerService : ICustomerService
         _customerRepository.Add(customer);
 
         return customer.Id;
+    }
+
+    public CustomerDto GetCustomerById(Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new ValidationException("Id can not be default value or null");
+
+        var customer = _customerRepository.GetById(id);
+        if (customer is null)
+            throw new NotFoundException("Customer with this id does not exist!");
+
+        return new CustomerDto { Id = customer.Id, FullName = customer.FullName };
     }
 }
