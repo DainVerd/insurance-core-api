@@ -21,14 +21,13 @@ public class ClaimService : IClaimService
     public Guid CreateClaim(CreateClaimRequest claimToAdd)
     {
         if (claimToAdd is null)
-            throw new ArgumentNullException("claim to Add is null!");
-
+            throw new ArgumentNullException("Claim to Add is null!");
 
         if (claimToAdd.AmountRequested <= 0)
             throw new ValidationException("AmountRequested must be greater than zero.");
 
         var policy = _policyRepository.GetById(claimToAdd.PolicyId)
-            ?? throw new NotFoundException("Policy with this id does not exist!");
+            ?? throw new NotFoundException($"Policy with this id: {claimToAdd.PolicyId} does not exist!");
 
         if (policy.Status != PolicyStatus.Active)
             throw new ConflictException("Claims can only be created for Active policies.");
