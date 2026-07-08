@@ -1,7 +1,8 @@
+using Application;
 using Asp.Versioning;
 using Asp.Versioning.ApiExplorer;
 using Infrastructure;
-using Application;
+using WebApi.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,6 +38,10 @@ try
 
     builder.Services.AddSwaggerGen();
 
+    // custom exception middleware for united exceptions
+    builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+    builder.Services.AddProblemDetails();
+
     var app = builder.Build();
 
 
@@ -58,7 +63,7 @@ try
             options.RoutePrefix = string.Empty;
         });
     }
-
+    app.UseExceptionHandler();
     app.MapControllers();
     app.Run();
 }
