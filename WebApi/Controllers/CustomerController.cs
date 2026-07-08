@@ -1,7 +1,9 @@
 ﻿using Application.DTOs;
+using Application.Exceptions;
 using Application.Interfaces.Services;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace WebApi.Controllers;
 
@@ -29,10 +31,16 @@ public class CustomerController : Controller
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public ActionResult GetCustomer(Guid id)
+    public ActionResult GetCustomer([FromRoute] Guid id)
     {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided Customer id is default value!");
+
         var result = _customerService.GetCustomerById(id);
 
-        return Ok(result);
+        if (result is null)
+            throw new NotFoundException("Customer was not found in db!");
+
+        return Ok(new CustomerDto { Id = result.Id, FullName = result.FullName });
     }
 }
