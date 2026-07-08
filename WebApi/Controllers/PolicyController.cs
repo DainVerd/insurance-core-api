@@ -40,4 +40,17 @@ public class PolicyController : Controller
 
         return Ok(result);
     }
+
+    [HttpPost("{id:guid}/activate")]
+    [ProducesResponseType(typeof(PolicyDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public IActionResult ActivatePolicyById([FromRoute] Guid id)
+    {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided Policy id is default value!");
+
+        _policyService.ActivatePolicy(id);
+
+        return Ok();
+    }
 }
