@@ -4,6 +4,7 @@ using Application.Interfaces.Repositories;
 using Application.Interfaces.Services;
 using Domain.Constants;
 using Domain.Entities;
+using Infrastructure.Repositories;
 using System.ComponentModel.DataAnnotations;
 
 namespace Infrastructure.Services;
@@ -52,11 +53,20 @@ public class PolicyService : IPolicyService
         return policy.Id;
     }
 
-    public Policy? GePolicyById(Guid id)
+    public PolicyDto GetById(Guid id)
     {
-        if (id == Guid.Empty)
-            throw new ValidationException("Provided Policy id is default value!");
+        var policy = _policyRepository.GetById(id)
+        ?? throw new NotFoundException($"Policy with ID {id} was not found.");
 
-        return _policyRepository.GetById(id);
+
+        return new PolicyDto
+        {
+            Id = policy.Id,
+            CustomerId = policy.CustomerId,
+            EndDate = policy.EndDate,
+            Premium = policy.Premium,
+            StartDate = policy.StartDate,
+            Status = policy.Status,
+        };
     }
 }
