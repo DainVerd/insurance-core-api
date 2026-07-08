@@ -1,4 +1,4 @@
-﻿using Application.Interfaces;
+﻿using Application.Interfaces.Repositories;
 using Domain.Interfaces;
 using System.Collections.Concurrent;
 
