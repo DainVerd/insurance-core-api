@@ -18,13 +18,13 @@ public class PolicyController : Controller
     }
 
     [HttpPost("")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult CreatePolicy([FromBody] CreatePolicyRequest request)
     {
-        var result = _policyService.CreatePolicy(request);
+        var id = _policyService.CreatePolicy(request);
 
-        return Ok(result);
+        return CreatedAtAction(nameof(CreatePolicy), new { id, version = "1.0" }, id);
     }
 
     [HttpGet("{id:guid}")]

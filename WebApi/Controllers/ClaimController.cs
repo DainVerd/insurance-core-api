@@ -23,9 +23,9 @@ public class ClaimController : Controller
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public IActionResult CreateClaim([FromBody] CreateClaimRequest request)
     {
-        var result = _claimService.CreateClaim(request);
+        var id = _claimService.CreateClaim(request);
 
-        return Ok(result);
+        return CreatedAtAction(nameof(CreatePolicy), new { id, version = "1.0" }, id);
     }
 
     [HttpGet("{id:guid}")]
