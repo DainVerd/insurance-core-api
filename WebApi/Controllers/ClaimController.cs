@@ -25,7 +25,7 @@ public class ClaimController : Controller
     {
         var id = _claimService.CreateClaim(request);
 
-        return CreatedAtAction(nameof(CreatePolicy), new { id, version = "1.0" }, id);
+        return CreatedAtAction(nameof(CreateClaim), new { id, version = "1.0" }, id);
     }
 
     [HttpGet("{id:guid}")]
