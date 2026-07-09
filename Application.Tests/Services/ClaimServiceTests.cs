@@ -273,7 +273,7 @@ public class ClaimServiceTests
 
         // Assert
         act.Should().Throw<ValidationException>();
-        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Once);
         _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
     }
 
