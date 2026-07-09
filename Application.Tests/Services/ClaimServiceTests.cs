@@ -3,7 +3,7 @@ using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using AwesomeAssertions;
-using Castle.Core.Resource;
+using Domain.Constants;
 using Domain.Entities;
 using Moq;
 using System.ComponentModel.DataAnnotations;
@@ -215,6 +215,143 @@ public class ClaimServiceTests
         _claimRepoMock.Verify(r => r.GetById(claimId), Times.Once);
     }
     #endregion
-    //#region Decide tests
-    //#endregion
+    #region Decide tests
+    [Fact]
+    public void Decide_ThrowValidationException_WhenProvidedIdHasDefaultValue()
+    {
+        // Arrange and Act
+        var act = () => _sut.Decide(Guid.Empty, null!);
+
+        // Assert
+        act.Should().Throw<ValidationException>();
+        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_ThrowArgumentNullException_WhenProvidedRequestEntityIsNull()
+    {
+        // Arrange and Act
+        var act = () => _sut.Decide(Guid.NewGuid(), null!);
+
+        // Assert
+        act.Should().Throw<ArgumentNullException>();
+        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_ThrowConflictExceptionException_WhenProvidedWithNotAllowedStatus()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.New,
+        };
+        // Act
+        var act = () => _sut.Decide(claimId, request);
+
+        // Assert
+        act.Should().Throw<ConflictException>();
+        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_ThrowConflictExceptionException_WhenStatusIsNotRejectedButHasDecisionReason()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.Approved,
+            DecisionReason = "Very important msg"
+        };
+        // Act
+        var act = () => _sut.Decide(claimId, request);
+
+        // Assert
+        act.Should().Throw<ConflictException>();
+        _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_ThrowNotFoundException_WhenClaimWasNotFound()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.Rejected,
+            DecisionReason = "Very important msg"
+        };
+        _claimRepoMock.Setup(v => v.GetById(claimId))
+            .Returns((Claim)null!);
+
+        // Act
+        var act = () => _sut.Decide(claimId, request);
+
+        // Assert
+        act.Should().Throw<NotFoundException>();
+        _claimRepoMock.Verify(r => r.GetById(claimId), Times.Once);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_ThrowConflictException_WhenClaimStatusIsNotNew()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.Rejected,
+            DecisionReason = "Very important msg"
+        };
+        var claimToDecide = new Claim
+        {
+            Id = claimId,
+            Status = ClaimStatus.Approved,
+        };
+        _claimRepoMock.Setup(v => v.GetById(claimId))
+            .Returns(claimToDecide);
+
+        // Act
+        var act = () => _sut.Decide(claimId, request);
+
+        // Assert
+        act.Should().Throw<ConflictException>();
+        _claimRepoMock.Verify(r => r.GetById(claimId), Times.Once);
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
+    }
+
+    [Fact]
+    public void Decide_UpdateClaim_OnSuccess()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.Rejected,
+            DecisionReason = "Very important msg"
+        };
+        var claimToDecide = new Claim
+        {
+            Id = claimId,
+            Status = ClaimStatus.New,
+        };
+        _claimRepoMock.Setup(v => v.GetById(claimId))
+            .Returns(claimToDecide);
+
+        // Act
+        _sut.Decide(claimId, request);
+
+        // Assert
+        claimToDecide.Status.Should().Be(request.Status);
+        claimToDecide.DecisionReason.Should().Be(request.DecisionReason);
+        _claimRepoMock.Verify(r => r.GetById(claimId), Times.Once);
+        _claimRepoMock.Verify(r => r.Update(claimToDecide), Times.Once);
+    }
+    #endregion
 }
