@@ -17,9 +17,9 @@ public class CustomerService : ICustomerService
     public Guid CreateCustomer(CreateCustomerRequest request)
     {
         if (request is null)
-            throw new ArgumentNullException("Id can not be default value or null");
+            throw new ArgumentNullException(nameof(request), "Id can not be default value or null");
 
-        if (string.IsNullOrEmpty(request.FullName))
+        if (string.IsNullOrWhiteSpace(request.FullName))
             throw new ValidationException("Full name is required.");
 
         var customer = new Customer { Id = Guid.NewGuid(), FullName = request.FullName };
