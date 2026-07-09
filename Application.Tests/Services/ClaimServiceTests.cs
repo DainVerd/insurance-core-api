@@ -91,7 +91,7 @@ public class ClaimServiceTests
         // Arrange 
         var policyId = Guid.NewGuid();
         var incidentDate = new DateTimeOffset(2026, 8, 1, 12, 12, 12, TimeSpan.Zero);
-        var claimToCreate = new CreateClaimRequest { PolicyId = policyId, AmountRequested = 66 };
+        var claimToCreate = new CreateClaimRequest { PolicyId = policyId, AmountRequested = 66, IncidentDate = incidentDate };
         var policy = new Policy
         {
             Id = policyId,
