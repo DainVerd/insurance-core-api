@@ -4,6 +4,7 @@
     <File Path="LICENSE" />
     <File Path="README.md" />
   </Folder>
+  <Project Path="Application.Tests/Application.Tests.csproj" Id="ec803cb5-4c68-47ec-a26d-d61dd75d8e38" />
   <Project Path="Application/Application.csproj" Id="70be14aa-8e7b-4730-ae5c-4ac3d0ba6ade" />
   <Project Path="Domain/Domain.csproj" Id="09a7cd96-4f8b-4731-8872-b24912685023" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="39692760-0785-4580-8c42-c433599b8e07" />
