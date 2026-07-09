@@ -15,6 +15,7 @@ public class CustomerEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         _client = factory.CreateClient();
     }
 
+    #region CreateCustomer tests
     [Fact]
     public async Task CreateCustomer_Returns201_WhenValidRequest()
     {
@@ -44,6 +45,8 @@ public class CustomerEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
 
+    #endregion
+    #region GetCustomer tests
     [Fact]
     public async Task GetCustomer_Returns200_WhenFoundCustomer()
     {
@@ -83,4 +86,5 @@ public class CustomerEndpointsTests : IClassFixture<WebApplicationFactory<Progra
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
     }
+    #endregion
 }
