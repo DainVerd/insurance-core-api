@@ -55,6 +55,9 @@ public class PolicyService : IPolicyService
 
     public PolicyDto GetById(Guid id)
     {
+        if (id == Guid.Empty)
+            throw new ValidationException("Provided id has default value!");
+
         var policy = _policyRepository.GetById(id)
         ?? throw new NotFoundException($"Policy with ID {id} was not found.");
 
