@@ -3,6 +3,7 @@ using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using AwesomeAssertions;
+using Castle.Core.Resource;
 using Domain.Entities;
 using Moq;
 using System.ComponentModel.DataAnnotations;
@@ -133,8 +134,54 @@ public class PolicyServiceTests
     }
 
     #endregion
-
     #region GetById
+    [Fact]
+    public void GetById_ThrowValidationException_WhenIdIsDefaultValueOfTheType()
+    {
+        // Arrange and Act
+        var act = () => _sut.GetById(Guid.Empty);
+
+        // Assert
+        act.Should().Throw<ValidationException>();
+        _policyRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+    }
+
+    [Fact]
+    public void GetById_ThrowNotFoundException_WhenPolicyWasNotFound()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns((Policy)null!);
+
+        // Act
+        var act = () => _sut.GetById(policyId);
+
+        // Assert
+        act.Should().Throw<NotFoundException>();
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
+    [Fact]
+    public void GetById_ReturnPolicy_WhenPolicyWasFound()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        var policyToReturn = new Policy
+        {
+            Id = policyId,
+        };
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns(policyToReturn);
+
+        // Act
+        var result = _sut.GetById(policyId);
+
+        // Assert
+        result.Id.Should().Be(policyToReturn.Id);
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
     #endregion
 
     #region ActivatePolicy
