@@ -72,3 +72,5 @@ catch (Exception ex)
     // TODO: add logging
     Console.WriteLine(ex);
 }
+// for integration tests
+public partial class Program { }

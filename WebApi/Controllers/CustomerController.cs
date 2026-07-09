@@ -18,17 +18,18 @@ public class CustomerController : Controller
     }
 
     [HttpPost("")]
-    [ProducesResponseType(typeof(Guid), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public IActionResult CreateCustomer([FromBody] CreateCustomerRequest request)
     {
-        var result = _customerService.CreateCustomer(request);
+        var id = _customerService.CreateCustomer(request);
 
-        return Ok(result);
+        return CreatedAtAction(nameof(CreateCustomer), new { id, version = "1.0" }, id);
     }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult GetCustomer([FromRoute] Guid id)
     {

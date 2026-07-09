@@ -16,6 +16,7 @@ public class ClaimController : Controller
     {
         _claimService = claimService;
     }
+
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -23,18 +24,19 @@ public class ClaimController : Controller
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public IActionResult CreateClaim([FromBody] CreateClaimRequest request)
     {
-        var result = _claimService.CreateClaim(request);
+        var id = _claimService.CreateClaim(request);
 
-        return Ok(result);
+        return CreatedAtAction(nameof(CreateClaim), new { id, version = "1.0" }, id);
     }
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(ClaimDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public ActionResult GetClaim([FromRoute] Guid id)
     {
         if (id == Guid.Empty)
-            throw new ValidationException("Provided claim id has default value or null!");
+            throw new ValidationException("Provided claim id has default value or is null!");
 
         var result = _claimService.GetById(id);
 
@@ -42,11 +44,11 @@ public class ClaimController : Controller
     }
 
     [HttpPost("{id:guid}/decide")]
-    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public IActionResult CreateClaim([FromRoute] Guid id, [FromBody] DecideClaimRequest request)
+    public IActionResult DecideClaim([FromRoute] Guid id, [FromBody] DecideClaimRequest request)
     {
         _claimService.Decide(id, request);
 
