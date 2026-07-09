@@ -50,6 +50,6 @@ public class ClaimController : Controller
     {
         _claimService.Decide(id, request);
 
-        return Ok();
+        return NoContent();
     }
 }
