@@ -72,20 +72,21 @@ public class ClaimService : IClaimService
     public void Decide(Guid claimId, DecideClaimRequest request)
     {
         if (claimId == Guid.Empty)
-            throw new ValidationException("Provided Claim id has default value!");
+            throw new ValidationException("Provided Claim id has default value.");
 
         if (request is null)
-            throw new ArgumentNullException("provided request argument is null!");
+            throw new ArgumentNullException(nameof(request));
 
         var allowedStatuses = new List<ClaimStatus> { ClaimStatus.Approved, ClaimStatus.Rejected };
 
         if (!allowedStatuses.Contains(request.Status))
-            throw new ConflictException($"Provided status: {request.Status} can not be used.");
+            throw new ValidationException($"Provided status: {request.Status} can not be used.");
 
-        var statusesWithDecisionReason = new List<ClaimStatus> { ClaimStatus.Rejected };
+        if (request.Status == ClaimStatus.Rejected && string.IsNullOrWhiteSpace(request.DecisionReason))
+            throw new ValidationException("DecisionReason is required when rejecting a claim.");
 
-        if (!statusesWithDecisionReason.Contains(request.Status) && !string.IsNullOrEmpty(request.DecisionReason))
-            throw new ConflictException($"Decision with {request.Status} status mustn't have DecisionReason field!");
+        if (request.Status == ClaimStatus.Approved && !string.IsNullOrWhiteSpace(request.DecisionReason))
+            throw new ValidationException("DecisionReason must not be provided when approving a claim.");
 
         var claimToDecide = _claimRepository.GetById(claimId)
         ?? throw new NotFoundException($"Claim with ID {claimId} was not found.");
