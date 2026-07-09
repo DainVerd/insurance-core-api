@@ -251,7 +251,7 @@ public class PolicyServiceTests
             StartDate = new DateOnly(2026,7,1),
             EndDate = new DateOnly(2026,7,31),
             ProductType = PolicyProductType.Auto,
-            CustomerId = Guid.NewGuid(),
+            CustomerId = customerId,
         };
 
         var activePolicies = new List<Policy>
@@ -303,7 +303,7 @@ public class PolicyServiceTests
             StartDate = new DateOnly(2026, 7, 1),
             EndDate = new DateOnly(2026, 7, 29),
             ProductType = PolicyProductType.Auto,
-            CustomerId = Guid.NewGuid(),
+            CustomerId = customerId,
         };
 
         var activePolicies = new List<Policy>
