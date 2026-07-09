@@ -1,5 +1,4 @@
 ﻿using Application.DTOs;
-using Application.Exceptions;
 using Application.Interfaces.Services;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
@@ -34,13 +33,10 @@ public class CustomerController : Controller
     public ActionResult GetCustomer([FromRoute] Guid id)
     {
         if (id == Guid.Empty)
-            throw new ValidationException("Provided Customer id is default value!");
+            throw new ValidationException("Provided Customer id has default value!");
 
         var result = _customerService.GetCustomerById(id);
 
-        if (result is null)
-            throw new NotFoundException("Customer was not found in db!");
-
-        return Ok(new CustomerDto { Id = result.Id, FullName = result.FullName });
+        return Ok(result);
     }
 }

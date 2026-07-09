@@ -1,5 +1,4 @@
 ﻿using Application.DTOs;
-using Application.Exceptions;
 using Application.Interfaces.Services;
 using Asp.Versioning;
 using Microsoft.AspNetCore.Mvc;
@@ -51,6 +50,6 @@ public class PolicyController : Controller
 
         _policyService.ActivatePolicy(id);
 
-        return Ok();
+        return NoContent();
     }
 }
