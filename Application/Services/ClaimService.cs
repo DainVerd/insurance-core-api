@@ -6,7 +6,7 @@ using Domain.Constants;
 using Domain.Entities;
 using System.ComponentModel.DataAnnotations;
 
-namespace Infrastructure.Services;
+namespace Application.Services;
 
 public class ClaimService : IClaimService
 {
