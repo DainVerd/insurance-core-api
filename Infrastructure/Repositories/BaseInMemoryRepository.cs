@@ -25,9 +25,4 @@ public abstract class BaseInMemoryRepository<T> : IRepository<T> where T : class
     {
         Storage[entity.Id] = entity;
     }
-
-    public void Delete(Guid id)
-    {
-        Storage.TryRemove(id, out _);
-    }
 }
