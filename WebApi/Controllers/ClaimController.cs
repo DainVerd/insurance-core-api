@@ -16,6 +16,7 @@ public class ClaimController : Controller
     {
         _claimService = claimService;
     }
+
     [HttpPost]
     [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -46,7 +47,7 @@ public class ClaimController : Controller
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     [ProducesResponseType(StatusCodes.Status409Conflict)]
-    public IActionResult CreateClaim([FromRoute] Guid id, [FromBody] DecideClaimRequest request)
+    public IActionResult DecideClaim([FromRoute] Guid id, [FromBody] DecideClaimRequest request)
     {
         _claimService.Decide(id, request);
 
