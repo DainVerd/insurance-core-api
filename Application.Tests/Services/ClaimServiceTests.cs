@@ -241,7 +241,7 @@ public class ClaimServiceTests
     }
 
     [Fact]
-    public void Decide_ThrowConflictExceptionException_WhenProvidedWithNotAllowedStatus()
+    public void Decide_ThrowValidationException_WhenProvidedWithNotAllowedStatus()
     {
         // Arrange
         var claimId = Guid.NewGuid();
@@ -253,13 +253,13 @@ public class ClaimServiceTests
         var act = () => _sut.Decide(claimId, request);
 
         // Assert
-        act.Should().Throw<ConflictException>();
+        act.Should().Throw<ValidationException>();
         _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
         _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
     }
 
     [Fact]
-    public void Decide_ThrowConflictExceptionException_WhenStatusIsNotRejectedButHasDecisionReason()
+    public void Decide_ThrowValidationException_WhenStatusIsNotRejectedButHasDecisionReason()
     {
         // Arrange
         var claimId = Guid.NewGuid();
@@ -272,7 +272,7 @@ public class ClaimServiceTests
         var act = () => _sut.Decide(claimId, request);
 
         // Assert
-        act.Should().Throw<ConflictException>();
+        act.Should().Throw<ValidationException>();
         _claimRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
         _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
     }
@@ -352,6 +352,32 @@ public class ClaimServiceTests
         claimToDecide.DecisionReason.Should().Be(request.DecisionReason);
         _claimRepoMock.Verify(r => r.GetById(claimId), Times.Once);
         _claimRepoMock.Verify(r => r.Update(claimToDecide), Times.Once);
+    }
+
+    [Fact]
+    public void Decide_ThrowValidationException_WhenRejectingWithoutDecisionReason()
+    {
+        // Arrange
+        var claimId = Guid.NewGuid();
+        var request = new DecideClaimRequest
+        {
+            Status = ClaimStatus.Rejected,
+            DecisionReason = null
+        };
+        var claimToDecide = new Claim
+        {
+            Id = claimId,
+            Status = ClaimStatus.New,
+        };
+        _claimRepoMock.Setup(v => v.GetById(claimId))
+            .Returns(claimToDecide);
+
+        // Act
+        var act = () => _sut.Decide(claimId, request);
+
+        // Assert
+        act.Should().Throw<ValidationException>();
+        _claimRepoMock.Verify(r => r.Update(It.IsAny<Claim>()), Times.Never);
     }
     #endregion
 }

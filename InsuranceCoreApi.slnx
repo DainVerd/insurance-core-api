@@ -9,6 +9,7 @@
   </Project>
   <Project Path="Application/Application.csproj" Id="70be14aa-8e7b-4730-ae5c-4ac3d0ba6ade" />
   <Project Path="Domain/Domain.csproj" Id="09a7cd96-4f8b-4731-8872-b24912685023" />
+  <Project Path="Infrastructure.Tests/Infrastructure.Tests.csproj" Id="76cbf756-41b3-43fa-802a-96f88d22d3e9" />
   <Project Path="Infrastructure/Infrastructure.csproj" Id="39692760-0785-4580-8c42-c433599b8e07" />
   <Project Path="WebApi/WebApi.csproj" />
 </Solution>
