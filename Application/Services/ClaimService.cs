@@ -69,7 +69,6 @@ public class ClaimService : IClaimService
         };
     }
 
-
     public void Decide(Guid claimId, DecideClaimRequest request)
     {
         if (claimId == Guid.Empty)
