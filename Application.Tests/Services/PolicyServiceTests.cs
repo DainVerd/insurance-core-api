@@ -3,7 +3,7 @@ using Application.Exceptions;
 using Application.Interfaces.Repositories;
 using Application.Services;
 using AwesomeAssertions;
-using Castle.Core.Resource;
+using Domain.Constants;
 using Domain.Entities;
 using Moq;
 using System.ComponentModel.DataAnnotations;
@@ -185,5 +185,162 @@ public class PolicyServiceTests
     #endregion
 
     #region ActivatePolicy
+    [Fact]
+    public void ActivatePolicy_ThrowValidationException_WhenIdIsDefaultValueOfTheType()
+    {
+        // Arrange and Act
+        var act = () => _sut.ActivatePolicy(Guid.Empty);
+
+        // Assert
+        act.Should().Throw<ValidationException>();
+        _policyRepoMock.Verify(r => r.GetActivePoliciesByCustomerAndProductType(It.IsAny<Guid>(), It.IsAny<PolicyProductType>()), Times.Never);
+        _policyRepoMock.Verify(r => r.Update(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.GetById(It.IsAny<Guid>()), Times.Never);
+    }
+    [Fact]
+    public void ActivatePolicy_ThrowNotFoundException_WhenPolicyWasNotFound()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns((Policy)null!);
+
+        // Act
+        var act = () => _sut.ActivatePolicy(policyId);
+
+        // Assert
+        act.Should().Throw<NotFoundException>();
+        _policyRepoMock.Verify(r => r.GetActivePoliciesByCustomerAndProductType(It.IsAny<Guid>(), It.IsAny<PolicyProductType>()), Times.Never);
+        _policyRepoMock.Verify(r => r.Update(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
+    [Fact]
+    public void ActivatePolicy_ThrowConflictException_WhenFoundPolicyToActivateIsNotInStatusDraft()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        var policyToActivate = new Policy
+        {
+            Id = policyId,
+            Status = PolicyStatus.Active
+        };
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns(policyToActivate);
+
+        // Act
+        var act = () => _sut.ActivatePolicy(policyId);
+
+        // Assert
+        act.Should().Throw<ConflictException>();
+        _policyRepoMock.Verify(r => r.GetActivePoliciesByCustomerAndProductType(It.IsAny<Guid>(), It.IsAny<PolicyProductType>()), Times.Never);
+        _policyRepoMock.Verify(r => r.Update(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
+    [Fact]
+    public void ActivatePolicy_ThrowConflictException_WhenPolicyHasOverlap()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        var customerId = Guid.NewGuid();
+        var policyToActivate = new Policy
+        {
+            Id = policyId,
+            Status = PolicyStatus.Draft,
+            StartDate = new DateOnly(2026,7,1),
+            EndDate = new DateOnly(2026,7,31),
+            ProductType = PolicyProductType.Auto,
+            CustomerId = Guid.NewGuid(),
+        };
+
+        var activePolicies = new List<Policy>
+        {
+            new Policy
+            {
+                Id = Guid.NewGuid(),
+                ProductType = PolicyProductType.Auto,
+                CustomerId = customerId,
+                StartDate = new DateOnly(2026,7,1),
+                EndDate = new DateOnly(2026,7,31),
+            },
+            new Policy
+            {
+                Id = Guid.NewGuid(),
+                ProductType = PolicyProductType.Auto,
+                CustomerId = customerId,
+                StartDate = new DateOnly(2026,8,1),
+                EndDate = new DateOnly(2026,8,31),
+            },
+        };
+
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns(policyToActivate);
+
+        _policyRepoMock.Setup(v => v.GetActivePoliciesByCustomerAndProductType(policyToActivate.CustomerId, policyToActivate.ProductType))
+            .Returns(activePolicies);
+
+        // Act
+        var act = () => _sut.ActivatePolicy(policyId);
+
+        // Assert
+        act.Should().Throw<ConflictException>();
+        _policyRepoMock.Verify(r => r.GetActivePoliciesByCustomerAndProductType(policyToActivate.CustomerId, policyToActivate.ProductType), Times.Once);
+        _policyRepoMock.Verify(r => r.Update(It.IsAny<Policy>()), Times.Never);
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
+    [Fact]
+    public void ActivatePolicy_ActivatePolicy_OnSuccess()
+    {
+        // Arrange
+        var policyId = Guid.NewGuid();
+        var customerId = Guid.NewGuid();
+        var policyToActivate = new Policy
+        {
+            Id = policyId,
+            Status = PolicyStatus.Draft,
+            StartDate = new DateOnly(2026, 7, 1),
+            EndDate = new DateOnly(2026, 7, 29),
+            ProductType = PolicyProductType.Auto,
+            CustomerId = Guid.NewGuid(),
+        };
+
+        var activePolicies = new List<Policy>
+        {
+            new Policy
+            {
+                Id = Guid.NewGuid(),
+                ProductType = PolicyProductType.Auto,
+                CustomerId = customerId,
+                StartDate = new DateOnly(2026,6,1),
+                EndDate = new DateOnly(2026,6,29),
+            },
+            new Policy
+            {
+                Id = Guid.NewGuid(),
+                ProductType = PolicyProductType.Auto,
+                CustomerId = customerId,
+                StartDate = new DateOnly(2026,8,1),
+                EndDate = new DateOnly(2026,8,29),
+            },
+        };
+
+        _policyRepoMock.Setup(v => v.GetById(policyId))
+            .Returns(policyToActivate);
+
+        _policyRepoMock.Setup(v => v.GetActivePoliciesByCustomerAndProductType(policyToActivate.CustomerId, policyToActivate.ProductType))
+            .Returns(activePolicies);
+
+        // Act
+        _sut.ActivatePolicy(policyId);
+
+        // Assert
+        policyToActivate.Status.Should().Be(PolicyStatus.Active);
+        _policyRepoMock.Verify(r => r.GetActivePoliciesByCustomerAndProductType(policyToActivate.CustomerId, policyToActivate.ProductType), Times.Once);
+        _policyRepoMock.Verify(r => r.Update(policyToActivate), Times.Once);
+        _policyRepoMock.Verify(r => r.GetById(policyId), Times.Once);
+    }
+
     #endregion
 }
