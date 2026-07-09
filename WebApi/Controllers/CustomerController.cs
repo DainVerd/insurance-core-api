@@ -29,6 +29,7 @@ public class CustomerController : Controller
 
     [HttpGet("{id:guid}")]
     [ProducesResponseType(typeof(CustomerDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public ActionResult GetCustomer([FromRoute] Guid id)
     {
